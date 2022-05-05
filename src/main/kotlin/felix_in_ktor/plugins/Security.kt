@@ -1,32 +1,38 @@
 package felix_in_ktor.plugins
 
 import io.ktor.server.auth.*
-import io.ktor.util.*
 import io.ktor.server.auth.jwt.*
 import com.auth0.jwt.JWT
-import com.auth0.jwt.JWTVerifier
 import com.auth0.jwt.algorithms.Algorithm
+import felix_in_ktor.models.base_response.FailResponse
+import felix_in_ktor.utils.StringConfig
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
-import io.ktor.server.request.*
-/*
+
 fun Application.configureSecurity() {
 
-    authentication {
-        jwt {
-            val jwtAudience = environment.config.property("jwt.audience").getString()
-            realm = environment.config.property("jwt.realm").getString()
-            verifier(
-                JWT
-                    .require(Algorithm.HMAC256("secret"))
-                    .withAudience(jwtAudience)
-                    .withIssuer(environment.config.property("jwt.domain").getString())
-                    .build()
-            )
+    val strConfig = StringConfig.getInstance()
+
+    install(Authentication) {
+        jwt("auth-jwt") {
+            realm = strConfig.jwtMyRealm
+            verifier(JWT.require(Algorithm.HMAC256(strConfig.jwtSecret))
+                .withAudience(strConfig.jwtAudience)
+                .withIssuer(strConfig.jwtIssuer)
+                .build())
+
             validate { credential ->
-                if (credential.payload.audience.contains(jwtAudience)) JWTPrincipal(credential.payload) else null
+                if (credential.payload.getClaim("username").asString() != "") {
+                    JWTPrincipal(credential.payload)
+                } else {
+                    null
+                }
+            }
+
+            challenge { defaultScheme, realm ->
+                call.respond(HttpStatusCode.Unauthorized, FailResponse(message = "Token is invalid or expired"))
             }
         }
     }
-
-}*/
+}

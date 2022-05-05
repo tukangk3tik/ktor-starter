@@ -14,6 +14,7 @@ Accept: application/json
 ### CREATE Person
 
 POST http://localhost:8080/api/person
+Authorization: Bearer {{auth_token}}
 Content-Type: application/json
 Accept: application/json
 
@@ -27,7 +28,8 @@ Accept: application/json
 
 ### UPDATE Person
 
-PUT http://localhost:8080/api/person/P0001
+PUT http://localhost:8080/api/person/P0002
+Authorization: Bearer {{auth_token}}
 Content-Type: application/json
 Accept: application/json
 
@@ -40,5 +42,19 @@ Accept: application/json
 ### DELETE Person
 
 DELETE http://localhost:8080/api/person/P0001
+Authorization: Bearer {{auth_token}}
 Accept: application/json
 
+
+### LOGIN User
+
+POST http://localhost:8080/api/login
+Content-Type: application/json
+Accept: application/json
+
+{
+  "username": "admin",
+  "password": "12345678"
+}
+
+> {% client.global.set("auth_token", response.body.data.accessToken); %}

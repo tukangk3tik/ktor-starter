@@ -2,6 +2,7 @@ package felix_in_ktor.plugins
 
 import felix_in_ktor.routes.indexRoutes
 import felix_in_ktor.routes.personRoutes
+import felix_in_ktor.routes.userRoutes
 import io.ktor.server.routing.*
 import io.ktor.server.application.*
 
@@ -11,6 +12,7 @@ fun Application.configureRouting() {
         route("/api") {
             indexRoutes()
             personRoutes()
+            userRoutes()
         }
     }
 }
