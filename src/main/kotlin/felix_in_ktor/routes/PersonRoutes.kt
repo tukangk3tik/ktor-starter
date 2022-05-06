@@ -1,5 +1,6 @@
 package felix_in_ktor.routes
 
+import felix_in_ktor.data_source.db.dao.personDao
 import felix_in_ktor.models.person.*
 import felix_in_ktor.models.base_response.FailResponse
 import felix_in_ktor.models.base_response.SuccessResponse
@@ -14,8 +15,10 @@ fun Route.personRoutes() {
     route("/person") {
 
         get {
-            if (personStorage.isNotEmpty()) {
-                call.respond(SuccessResponse<List<Person>>(data = personStorage))
+            val persons = personDao.allPersons()
+
+            if (persons.isNotEmpty()) {
+                call.respond(SuccessResponse(data = persons))
             } else {
                 call.respond(FailResponse(message = "No person found"))
             }
@@ -29,7 +32,7 @@ fun Route.personRoutes() {
             )
 
             //find person
-            val person = personStorage.find { it.id == id } ?: return@get call.respond(
+            val person = personDao.getPerson(id.toInt()) ?: return@get call.respond(
                 message = FailResponse(message = "No person with id $id"),
                 status = HttpStatusCode.NotFound
             )
@@ -40,17 +43,9 @@ fun Route.personRoutes() {
         authenticate("auth-jwt") {
             post {
                 val person = call.receive<Person>()
+                val newPerson = personDao.addNewPerson(firstName = person.firstName, lastName = person.lastName, age = person.age)
 
-                val availablePerson = personStorage.find { it.id == person.id }
-                if(availablePerson != null)  {
-                    return@post call.respond(
-                        message = FailResponse(message = "Person with id ${person.id} is already available"),
-                        status = HttpStatusCode.NotAcceptable
-                    )
-                }
-
-                personStorage.add(person)
-                call.respond(message = SuccessResponse(data = person), status = HttpStatusCode.Created)
+                call.respond(message = SuccessResponse(data = newPerson), status = HttpStatusCode.Created)
             }
 
             put ("{id?}") {
@@ -60,26 +55,25 @@ fun Route.personRoutes() {
                 )
 
                 val receiveData = call.receive<UpdatePerson>()
-                val person = personStorage.find { it.id == id }
-                    ?: return@put call.respond(
-                        message = FailResponse(message = "No person with id $id"),
-                        status = HttpStatusCode.NotFound
-                    )
+                personDao.getPerson(id.toInt()) ?: return@put call.respond(
+                    message = FailResponse(message = "No person with id $id"),
+                    status = HttpStatusCode.NotFound
+                )
 
-                val newData = Person(id = id, firstName = receiveData.firstName, lastName = receiveData.lastName, age = receiveData.age)
-                personStorage[personStorage.indexOf(person)] = newData
+                val result = personDao.editPerson(id = id.toInt(), firstName = receiveData.firstName, lastName = receiveData.lastName, age = receiveData.age)
+                if (!result) return@put call.respond(message = FailResponse(message = "Something wrong, please contact admin"), status = HttpStatusCode.NotModified)
 
-                return@put call.respond(message = SuccessResponse(data = newData), status = HttpStatusCode.Accepted)
+                call.respond(message = SuccessResponse(data = "Data with id $id has updated"), status = HttpStatusCode.Accepted)
             }
 
             delete("{id?}") {
                 val id = call.parameters["id"] ?: return@delete call.respond(
-                        message = FailResponse(message = "Missing person id"),
-                        status = HttpStatusCode.BadRequest
+                    message = FailResponse(message = "Missing person id"),
+                    status = HttpStatusCode.BadRequest
                 )
 
-                if (personStorage.removeIf { it.id == id }) {
-                    call.respond(message = SuccessResponse(data = "$id deleted"), status = HttpStatusCode.Accepted)
+                if (personDao.deletePerson(id.toInt())) {
+                    call.respond(message = SuccessResponse(data = "Data with id $id has deleted"), status = HttpStatusCode.Accepted)
                 } else {
                     call.respond(
                         message = FailResponse(message = "Not found"),

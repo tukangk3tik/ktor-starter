@@ -1,5 +1,6 @@
 package felix_in_ktor
 
+import felix_in_ktor.data_source.db.DatabaseFactory
 import felix_in_ktor.plugins.*
 import felix_in_ktor.utils.StringConfig
 import io.ktor.server.application.*
@@ -14,6 +15,7 @@ fun Application.module() {
     strConfig.jwtAudience = environment.config.property("jwt.audience").getString()
     strConfig.jwtMyRealm = environment.config.property("jwt.realm").getString()
 
+    DatabaseFactory.init()
     configureRouting()
     configureSerialization()
     configureSecurity()

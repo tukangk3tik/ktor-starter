@@ -4,13 +4,13 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Person(
-    val id: String,
+    val id: Int = 0,
     val firstName: String,
     val lastName: String,
     val age: Int
 )
 
 val personStorage = mutableListOf(
-    Person(id = "P0001", firstName = "Yusuf", lastName = "Hai", age = 24),
-    Person(id = "P0002", firstName = "Reno", lastName = "Karno", age = 20)
+    Person(id = 1, firstName = "Yusuf", lastName = "Hai", age = 24),
+    Person(id = 2, firstName = "Reno", lastName = "Karno", age = 20)
 )

@@ -7,7 +7,7 @@ Accept: application/json
 
 ### GET Person
 
-GET http://localhost:8080/api/person/P0002
+GET http://localhost:8080/api/person/2
 Accept: application/json
 
 
@@ -19,16 +19,15 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "id": "P0003",
-  "firstName": "Rotua",
-  "lastName": "Nababan",
+  "firstName": "Marco",
+  "lastName": "Silaban",
   "age": 20
 }
 
 
 ### UPDATE Person
 
-PUT http://localhost:8080/api/person/P0002
+PUT http://localhost:8080/api/person/2
 Authorization: Bearer {{auth_token}}
 Content-Type: application/json
 Accept: application/json
@@ -41,7 +40,7 @@ Accept: application/json
 
 ### DELETE Person
 
-DELETE http://localhost:8080/api/person/P0001
+DELETE http://localhost:8080/api/person/1
 Authorization: Bearer {{auth_token}}
 Accept: application/json
 
